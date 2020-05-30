@@ -1,7 +1,12 @@
 package com.example.demo.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -32,9 +37,6 @@ public class UploadController {
         }
 
         String fileName = file.getOriginalFilename();
-        //加时间戳
-        fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + "_" + fileName;
-
         //上传路径
         String path = "/root/fileupload/" +fileName;
 
@@ -65,5 +67,26 @@ public class UploadController {
         result.put("code",0);
         result.put("url",url);
         return result;
+    }
+
+    @RequestMapping(value="/files/{fileName}",produces="application/json;charset=UTF-8")
+    @ResponseBody
+    public ResponseEntity<FileSystemResource> getFile(@PathVariable String fileName) {
+        File file=new File("/root/fileupload/"+fileName);
+        return export(file);
+    }
+
+    public ResponseEntity<FileSystemResource> export(File file) {
+        if (file == null) {
+            return null;
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headers.add("Content-Disposition", "attachment; filename=" + file.getName());
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+        headers.add("Last-Modified", new Date().toString());
+        headers.add("ETag", String.valueOf(System.currentTimeMillis()));
+        return ResponseEntity.ok().headers(headers).contentLength(file.length()).contentType(MediaType.parseMediaType("application/octet-stream")).body(new FileSystemResource(file));
     }
 }
