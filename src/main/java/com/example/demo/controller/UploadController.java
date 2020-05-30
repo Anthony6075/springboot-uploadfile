@@ -36,7 +36,7 @@ public class UploadController {
         fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + "_" + fileName;
 
         //上传路径
-        String path = "D:/fileupload/" +fileName;
+        String path = "/root/fileupload/" +fileName;
 
         //创建文件路径
         File dest = new File(path);
@@ -56,7 +56,7 @@ public class UploadController {
         try {
             //上传文件
             file.transferTo(dest); //保存文件
-            url="http://localhost:8080/files/"+fileName;
+            url="http://123.57.203.185:8088/files/"+fileName;
         } catch (IOException e) {
             result.put("code",-1);
             result.put("msg","上传失败");
