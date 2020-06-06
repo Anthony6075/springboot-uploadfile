@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-@RestController
+@Controller
 public class UploadController {
     private String  url;
     //private String serverAndPort="http://123.57.203.185:8088";
