@@ -3,18 +3,15 @@ package com.example.demo.controller;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import java.awt.image.BufferedImage;
+import javax.annotation.Resource;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,6 +22,9 @@ public class UploadController {
     private String  url;
     //private String serverAndPort="http://123.57.203.185:8088";
     private String uploadPath="/root/fileupload/";
+
+    @Resource
+    private ResourceLoader resourceLoader;
 
     @RequestMapping("/file")
     public String file(){
@@ -85,15 +85,12 @@ public class UploadController {
     @RequestMapping(value = "/display/{fileName}",
             produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE, MediaType.IMAGE_PNG_VALUE})
     @ResponseBody
-    public BufferedImage getImage(@PathVariable String fileName) {
-        try {
-            return ImageIO.read(new FileInputStream(new File("/root/fileupload/" + fileName)));
-        }
-        catch (IOException e){
-            /*JSONObject result=new JSONObject();
-            result.put("code",-1);
-            result.put("msg","显示图片异常");*/
-            return null;
+    public Object show(@PathVariable String fileName){
+        try
+        {
+            return ResponseEntity.ok(resourceLoader.getResource("file:" + "/root/fileupload/" + fileName));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
         }
     }
 

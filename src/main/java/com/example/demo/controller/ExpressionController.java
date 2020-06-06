@@ -1,19 +1,21 @@
 package com.example.demo.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+import javax.annotation.Resource;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 @RestController
 public class ExpressionController {
     private String expressionsPath="/root/expressions";
+
+    @Resource
+    private ResourceLoader resourceLoader;
 
     @GetMapping("/expre/getExpression")
     public JSONObject getExpression() {
@@ -35,15 +37,12 @@ public class ExpressionController {
     @RequestMapping(value = "/expre/{expressionName}",
             produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE, MediaType.IMAGE_PNG_VALUE})
     @ResponseBody
-    public BufferedImage getImage(@PathVariable String expressionName) {
-        try {
-            return ImageIO.read(new FileInputStream(new File(expressionsPath + "/" + expressionName)));
-        }
-        catch (IOException e){
-            /*JSONObject result=new JSONObject();
-            result.put("code",-1);
-            result.put("msg","显示图片异常");*/
-            return null;
+    public Object show(@PathVariable String expressionName){
+        try
+        {
+            return ResponseEntity.ok(resourceLoader.getResource("file:" + "/root/expressions/" + expressionName));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }
