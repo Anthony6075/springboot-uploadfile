@@ -1,24 +1,30 @@
 package com.example.demo.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-@Controller
+@RestController
 public class UploadController {
     private String  url;
+    //private String serverAndPort="http://123.57.203.185:8088";
+    private String uploadPath="/root/fileupload/";
 
     @RequestMapping("/file")
     public String file(){
@@ -37,8 +43,10 @@ public class UploadController {
         }
 
         String fileName = file.getOriginalFilename();
+        //加时间戳
+        fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + "_" + fileName;
         //上传路径
-        String path = "/root/fileupload/" +fileName;
+        String path = uploadPath +fileName;
 
         //创建文件路径
         File dest = new File(path);
@@ -58,7 +66,7 @@ public class UploadController {
         try {
             //上传文件
             file.transferTo(dest); //保存文件
-            url="http://123.57.203.185:8088/files/"+fileName;
+            url="/display/"+fileName;
         } catch (IOException e) {
             result.put("code",-1);
             result.put("msg","上传失败");
@@ -69,10 +77,30 @@ public class UploadController {
         return result;
     }
 
-    @RequestMapping(value="/files/{fileName}",produces="application/json;charset=UTF-8")
+    @Bean
+    public BufferedImageHttpMessageConverter bufferedImageHttpMessageConverter(){
+        return new BufferedImageHttpMessageConverter();
+    }
+
+    @RequestMapping(value = "/display/{fileName}",
+            produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE, MediaType.IMAGE_PNG_VALUE})
+    @ResponseBody
+    public BufferedImage getImage(@PathVariable String fileName) {
+        try {
+            return ImageIO.read(new FileInputStream(new File("/root/fileupload/" + fileName)));
+        }
+        catch (IOException e){
+            /*JSONObject result=new JSONObject();
+            result.put("code",-1);
+            result.put("msg","显示图片异常");*/
+            return null;
+        }
+    }
+
+    @RequestMapping(value="/download/{fileName}",produces="application/json;charset=UTF-8")
     @ResponseBody
     public ResponseEntity<FileSystemResource> getFile(@PathVariable String fileName) {
-        File file=new File("/root/fileupload/"+fileName);
+        File file=new File(uploadPath+fileName);
         return export(file);
     }
 
