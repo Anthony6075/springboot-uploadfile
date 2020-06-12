@@ -32,9 +32,10 @@ public class UploadController {
         return "file";
     }
 
-    @RequestMapping(value="/user/uploadFile",produces="application/json;charset=UTF-8")
+    @RequestMapping(value="/uploadFile",produces="application/json;charset=UTF-8")
     @ResponseBody
     public JSONObject uploadFile(@RequestParam("fileName") MultipartFile file) {
+        System.out.println("uploadFile-start------");
         JSONObject result=new JSONObject();
         //判断文件是否为空
         if (file.isEmpty()) {
@@ -71,10 +72,12 @@ public class UploadController {
         } catch (IOException e) {
             result.put("code",-1);
             result.put("msg","上传失败");
+            System.out.println("uploadFile-fail------");
             return result;
         }
         result.put("code",0);
         result.put("url",url);
+        System.out.println("uploadFile-success------");
         return result;
     }
 
